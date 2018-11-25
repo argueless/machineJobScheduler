@@ -34,7 +34,6 @@ public class Main {
 	
 	// Sort Stack by job's end time
 	private static Stack<Job> sortstack(Stack<Job> input) {
-		// TODO Auto-generated method stub
 		Stack<Job> tmpStack = new Stack<Job>(); 
         while(!input.isEmpty()) 
         { 
