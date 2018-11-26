@@ -84,6 +84,7 @@ public class Main {
 	}
 
 	// Method to create array for Job schedule by Job Number (final output)
+	// Greedy Algorithm
 	// jobs is a sorted stack
 	// m is number of machines
 	public static int[][] scheduleJobs(Stack<Job> jobs, int m) {
@@ -97,6 +98,7 @@ public class Main {
 		//machines[1][0] = jobs.pop(); // first job is always chosen
 		schedule[1][0] = machines[1][0].jobNumber;
 		
+		// Greedy Algorithm
 		// Schedule jobs to machines
 		while (!jobs.isEmpty()) {
 			for (i=1; i<=m; i++) {
