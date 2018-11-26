@@ -14,15 +14,17 @@ public class Main {
             input = new Scanner(file);
             
             Stack<Job> jb = new Stack<Job>();	// Stack to store jobs
-
+            int i = 1;
             while (input.hasNextLine()) {	// Read input into a Stack
                 String line = input.nextLine();
                 String[] l = line.split(" ");
+                int jobNumber = i;
                 int start = Integer.parseInt(l[0]);
                 int end = Integer.parseInt(l[1]);
 
-                Job j = new Job(start, end);
+                Job j = new Job(jobNumber, start, end);
                 jb.push(j);
+                i++;
             }
             input.close();
             sortstack(jb);
@@ -58,15 +60,25 @@ public class Main {
 
 }
 class Job {
-
+	
+	int jobNumber;
     int start;
     int end;
 
-    public Job(int start, int end) {
+    public Job(int jobNumber, int start, int end) {
+    		this.jobNumber = jobNumber;
         this.start = start;
         this.end = end;
     }
 
+    public int getJobNumber() {
+    		return jobNumber;
+    }
+    
+    public void setJobNumber(int jobNumber) {
+    		this.jobNumber = jobNumber;
+    }
+    
     public int getStart() {
         return start;
     }
@@ -84,7 +96,7 @@ class Job {
     }
 
     public String toString() {
-        return this.start + " " + this.end;
+        return this.jobNumber + " " + this.start + " " + this.end;
     }
 }
 
