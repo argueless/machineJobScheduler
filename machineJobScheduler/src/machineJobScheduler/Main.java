@@ -9,17 +9,18 @@ import java.io.PrintStream;
 
 public class Main {
 	
-	// TODO some jobs aren't selected
-	
-	
-	
-	
-	static int machine=0;	// initialize variable for number of machines
-	static int nj=0;		// initialize variable for number of jobs
+	static int machine=0;	// variable for number of machines
+	static int nj=0;		// variable for number of jobs
 	
 	public static void main(String[] args) {
+		
+		// Stack to store jobs
+        Stack<Job> jb = new Stack<Job>();
+        // list of the job schedule (final output)
+        ArrayList <ArrayList<Job>> schedule = new ArrayList<>();
+        
         try{
-        		// Read input file
+        		// Ask user to input file
             System.out.print("Enter file name:");
             Scanner input = new Scanner(System.in);
             File file = new File(input.nextLine());
@@ -30,10 +31,8 @@ public class Main {
             String[] f = first.split(" ");
             machine = Integer.parseInt(f[1]);
             
-            // Stack to store jobs
-            Stack<Job> jb = new Stack<Job>();
+            // Read input of jobs into a Stack
             int i = 1;
-            // Read input into a Stack
             while (input.hasNextLine()) {
                 String line = input.nextLine();
                 String[] l = line.split(" ");
@@ -46,61 +45,70 @@ public class Main {
                 i++;
             }
             input.close();
-            // Sort input by Job's finish time            
-            Stack<Job> ordFTime = new Stack<Job>();
-            ordFTime = sortstack(jb);
-            // Create arraylist holding the job schedule (final output)
-            ArrayList <ArrayList<Job>> ans = schedule(sortstack(ordFTime), machine);
+            
+            // Sort input by Job's finish time
+            Stack<Job> ordJobs = new Stack<Job>();
+            ordJobs = sortstack(jb);
+            
+            // initialize schedule list with number of machines
+            for (int r=0; r<machine; r++)
+            		schedule.add(new ArrayList<Job>());
+            
+            // Call greedy algorithm to assign jobs
+            while (!ordJobs.isEmpty()) {
+    				boolean added = false;
+    				assign(schedule, ordJobs.peek(), machine, added);
+    				if (added == false)
+    					ordJobs.pop();
+    				else
+    					continue;    				
+    			}
             
             // Output Machine Job Schedule to a txt file
     			PrintStream out = new PrintStream(new FileOutputStream("Output.txt"));
     			out.print(nj);
     			out.println("\n");
-    			for (int j=0; j<ans.size(); j++) {
-    				for (int k=0; k<ans.get(j).size(); k++) {
-    					out.print(ans.get(j).get(k).getJobNumber() + " ");
+    			for (int j=0; j<schedule.size(); j++) {
+    				for (int k=0; k<schedule.get(j).size(); k++) {
+    					out.print(schedule.get(j).get(k).getJobNumber() + " ");
     				}
     				out.println("\n");
     			}
-    			//out.close();
+    			out.close();
     			
         }catch (Exception ex) {
             ex.printStackTrace();
         }
 	}
 
-	// Method to create array for Job schedule by Job Number (final output)
+	// Method to create list for Job schedule by Job Number (final output)
 	// Greedy Algorithm
 	// jobs is a sorted stack
 	// m is number of machines	
-	public static ArrayList <ArrayList<Job>> schedule(Stack<Job> j, int m) {
+	public static void assign(ArrayList <ArrayList<Job>> jobs, Job j, int m, boolean added) {
 		
-		ArrayList <ArrayList<Job>> jobs = new ArrayList<>();	// List to store job schedule
-		// initialize arraylist
-		for (int r=0; r<m; r++)
-			jobs.add(new ArrayList<Job>());
-		
-		// Greedy Algorithm
-		// Schedule jobs to machines	
-		while (!j.isEmpty()) {				
-			for (int i = 0; i < m; i++) {	
-				// Assign job to machine if machine has no jobs
-				if (jobs.get(i).isEmpty()) {
-					jobs.get(i).add(j.pop());
-					nj++;
-				}				
-				// Compare job's start time to job's end time
-				if ((!j.isEmpty()) && (j.peek().getStart() >= jobs.get(i).get(jobs.get(i).size() - 1).getEnd())) {
-					jobs.get(i).add(j.pop());
-					nj++;
-				}
-				// delete job if it will not fit
-				else if (!j.isEmpty())
-					j.pop();
+		// Iterate through machines
+		for (int i=0; i < m; i++) {
+			// Assign job to machine if machine has no jobs
+			if (jobs.get(i).isEmpty()) {
+				jobs.get(i).add(j);
+				nj++;
+				added = true;
+				break;
 			}
-		} 
-		
-		return jobs;		
+			// Compare open job's start time to scheduled job's end time
+			if (j.getStart() >= jobs.get(i).get(jobs.get(i).size() - 1).getEnd()) {
+				jobs.get(i).add(j);
+				nj++;
+				added = true;
+				break;
+			}
+			// Delete job if cannot be scheduled
+			else
+				added = false;
+				
+		}
+
 	}	
 	
 	// Method to Sort Stack by job's end time
