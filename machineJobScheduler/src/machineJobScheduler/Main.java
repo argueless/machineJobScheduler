@@ -1,6 +1,7 @@
 package machineJobScheduler;
 
 import java.io.File;
+import java.util.ArrayList;
 import java.util.Scanner;
 import java.util.Stack;
 import java.io.FileOutputStream;
@@ -8,7 +9,13 @@ import java.io.PrintStream;
 
 public class Main {
 	
+	// TODO some jobs aren't selected
+	
+	
+	
+	
 	static int machine=0;	// initialize variable for number of machines
+	static int nj=0;		// initialize variable for number of jobs
 	
 	public static void main(String[] args) {
         try{
@@ -39,25 +46,62 @@ public class Main {
                 i++;
             }
             input.close();
-            // Sort input by Job's finish time
-            // Create array for schedule by JobNumber
-            int[][] schedule = scheduleJobs(sortstack(jb), machine);	
+            // Sort input by Job's finish time            
+            Stack<Job> ordFTime = new Stack<Job>();
+            ordFTime = sortstack(jb);
+            // Create arraylist holding the job schedule (final output)
+            ArrayList <ArrayList<Job>> ans = schedule(sortstack(ordFTime), machine);
             
             // Output Machine Job Schedule to a txt file
     			PrintStream out = new PrintStream(new FileOutputStream("Output.txt"));
-    			for (int r=0; r<schedule.length; r++) {
-    				for (int c=0; c<schedule[r].length; c++) {
-    					out.print(schedule[r][c] + "\t");
+    			out.print(nj);
+    			out.println("\n");
+    			for (int j=0; j<ans.size(); j++) {
+    				for (int k=0; k<ans.get(j).size(); k++) {
+    					out.print(ans.get(j).get(k).getJobNumber() + " ");
     				}
     				out.println("\n");
     			}
-    			out.close();
+    			//out.close();
     			
         }catch (Exception ex) {
             ex.printStackTrace();
         }
 	}
-    
+
+	// Method to create array for Job schedule by Job Number (final output)
+	// Greedy Algorithm
+	// jobs is a sorted stack
+	// m is number of machines	
+	public static ArrayList <ArrayList<Job>> schedule(Stack<Job> j, int m) {
+		
+		ArrayList <ArrayList<Job>> jobs = new ArrayList<>();	// List to store job schedule
+		// initialize arraylist
+		for (int r=0; r<m; r++)
+			jobs.add(new ArrayList<Job>());
+		
+		// Greedy Algorithm
+		// Schedule jobs to machines	
+		while (!j.isEmpty()) {				
+			for (int i = 0; i < m; i++) {	
+				// Assign job to machine if machine has no jobs
+				if (jobs.get(i).isEmpty()) {
+					jobs.get(i).add(j.pop());
+					nj++;
+				}				
+				// Compare job's start time to job's end time
+				if ((!j.isEmpty()) && (j.peek().getStart() >= jobs.get(i).get(jobs.get(i).size() - 1).getEnd())) {
+					jobs.get(i).add(j.pop());
+					nj++;
+				}
+				// delete job if it will not fit
+				else if (!j.isEmpty())
+					j.pop();
+			}
+		} 
+		
+		return jobs;		
+	}	
 	
 	// Method to Sort Stack by job's end time
 	private static Stack<Job> sortstack(Stack<Job> input) {
@@ -70,7 +114,7 @@ public class Main {
             // while temporary stack is not empty and 
             // top of stack is greater than temp 
             while(!tmpStack.isEmpty() && tmpStack.peek().end  
-                                                 > tmp.end) 
+                                                 < tmp.end) 
             { 
             // pop from temporary stack and  
             // push it to the input stack 
@@ -82,55 +126,6 @@ public class Main {
         } 
         return tmpStack;
 	}
-
-	// Method to create array for Job schedule by Job Number (final output)
-	// Greedy Algorithm
-	// jobs is a sorted stack
-	// m is number of machines
-	public static int[][] scheduleJobs(Stack<Job> jobs, int m) {
-		
-		int i, nj=0;	// nj is number of jobs
-		
-		Job[][] machines = new Job[m][]; // Array for machines that holds Jobs. Needed to compare jobs
-		int[][] schedule = new int[m][];	// Array showing schedule by Job Number. (final output)
-		
-		// first row is number of jobs
-		//machines[1][0] = jobs.pop(); // first job is always chosen
-		schedule[1][0] = machines[1][0].jobNumber;
-		
-		// Greedy Algorithm
-		// Schedule jobs to machines
-		while (!jobs.isEmpty()) {
-			for (i=1; i<=m; i++) {
-				// Assign job to machine if machine has no jobs
-				if (machines[i].length == 0) {
-					machines[i][machines[i].length] = jobs.pop();
-					nj++;
-				}
-				// Compare job's start time to job's end time
-				if (jobs.peek().getStart() >= machines[i][machines[i].length - 1].getEnd()) {
-					machines[i][machines[i].length] = jobs.pop();
-					nj++;
-				}
-				// delete job if it will not fit
-				else
-					jobs.pop();
-			}		
-		}
-		
-		// First row of array is number of jobs
-		schedule[0][0] = nj;
-		// Create array for for the schedule by job number
-		for (int t=1; t<=machines.length; t++) {
-			for (int s=0; s < machines[t].length; s++) {
-				schedule[t][s] = machines[t][s].getJobNumber();
-			}
-		}
-		
-		return schedule;
-		
-	}
-	
 }
 
 

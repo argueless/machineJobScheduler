@@ -12,6 +12,11 @@ public class Job {
         this.end = end;
     }
 
+    public Job() {
+    		jobNumber=0;
+    		start=0;
+    		end=0;
+    }
     public int getJobNumber() {
     		return jobNumber;
     }
