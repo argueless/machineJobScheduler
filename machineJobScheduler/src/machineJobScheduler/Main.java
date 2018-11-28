@@ -9,6 +9,7 @@ import java.io.PrintStream;
 
 public class Main {
 	
+	
 	static int machine=0;	// variable for number of machines
 	static int nj=0;		// variable for number of jobs
 	
